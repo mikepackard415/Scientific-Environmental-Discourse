@@ -12,3 +12,7 @@ Right now I am working on getting Atom up and running. I think I will prefer it 
 
 ### January 5th, 2022
 Well, I spent the half hour trying to get Atom to open with a command in the Ubuntu terminal. Would have been nice, but no dice. Moving on to folder organization, which I think will take me to 12:45 or so. Then I'll put in the second hour later in the day.
+
+It is now 9:40 pm - I'm starting my second hour of thesis work. Going to open up a jupyter notebook, read in the Resilience data, and start playing around with topic modeling.
+
+Considering whether to expand my archive to be more inclusive of other environmental blogs. It certainly feels a little too heuristic to have more than 70% of my data coming from the place I worked over the summer. Grist is the website I remember Rob and Asher mentioning as being somewhat similar to Resilience, so I think tonight I'll start working on scraping Grist. I hope I'm not just doing this to delay the more uncertain work.
