@@ -16,3 +16,14 @@ Well, I spent the half hour trying to get Atom to open with a command in the Ubu
 It is now 9:40 pm - I'm starting my second hour of thesis work. Going to open up a jupyter notebook, read in the Resilience data, and start playing around with topic modeling.
 
 Considering whether to expand my archive to be more inclusive of other environmental blogs. It certainly feels a little too heuristic to have more than 70% of my data coming from the place I worked over the summer. Grist is the website I remember Rob and Asher mentioning as being somewhat similar to Resilience, so I think tonight I'll start working on scraping Grist. I hope I'm not just doing this to delay the more uncertain work.
+
+### January 6th, 2022
+New day. I am 30 minutes in and I have the Grist data collector running. By a very rough estimate, I think it'll take about 2 hours. In the meantime, I'm going to look around for any other sites that might be worth scraping. I also need to work on the IRB process more soon. It'll be good to get that out of the way.
+
+About to sign off, ending my first hour of the day. I have an article list for InsideClimateNews, and the Grist scraper is doing its thing, currently at 8%. Going to do a few errands around the apartment before coming back to get another hour in. I'm liking this system so far, hope I can keep it up for a while.
+
+Just put in another 15 minutes to get the ICN scraping rolling. 45 minutes left for today.
+
+Starting now on my 45 minute session. The Grist scraper is still running, believe it or not. But the ICN scraper finished up, which is nice. I think I'm going to interrupt the Grist scraper, save out what's been collected so far, and use that in building a big Environmental Discourse dataframe in a new notebook, which I can play with while the scraper finishes up. It would be nice to get some exploratory plots and stuff going.
+
+That's that. Good day of work. Time to settle in for a relaxing evening. Until tomorrow!
