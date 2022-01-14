@@ -130,3 +130,6 @@ dmypy.json
 
 # Data folder
 DATA/
+
+# Examples folder
+Examples/

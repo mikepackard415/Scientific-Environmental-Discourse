@@ -27,3 +27,14 @@ Just put in another 15 minutes to get the ICN scraping rolling. 45 minutes left 
 Starting now on my 45 minute session. The Grist scraper is still running, believe it or not. But the ICN scraper finished up, which is nice. I think I'm going to interrupt the Grist scraper, save out what's been collected so far, and use that in building a big Environmental Discourse dataframe in a new notebook, which I can play with while the scraper finishes up. It would be nice to get some exploratory plots and stuff going.
 
 That's that. Good day of work. Time to settle in for a relaxing evening. Until tomorrow!
+
+### January 10th, 2022
+Okay, I fell off the wagon the last few days with regards to thesis work. On Friday I had a headache because I didn't eat enough Thursday night. On Saturday we spent the entire day in the suburbs. I could have worked in the basement for an hour, but didn't feel like it. On Sunday... I can't remember why but I didn't do anything. Today is Monday, and it's already 11:47 pm, so not too much of Monday left. Regardless, I'm going to sneak in a half hour of thesis work before bed. Will call it quits around 12:20. 
+
+What would be good to accomplish tonight? How about a dynamic word embedding model that tracks the word "science" in the environmental discourse corpus. That sounds like a good idea.
+
+Believe it or not I actually got the code running in 30 minutes (just copied it from MACS 30124). The stemming step is taking its time, as will the fitting step I imagine. So I'll let it run overnight and we'll see in the morning if it produces anything cool. Just kind of having fun with this stuff right now.
+
+### January 13th
+Here we go ahead. It is 10:53 pm and I am sneaking in an hour long session. Goals are to clean up he w2v models I generated last time, and then put my shoulder into the approval process. Just want to get that out of the way. And it is important, anyway.
+
