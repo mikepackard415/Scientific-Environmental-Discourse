@@ -133,3 +133,6 @@ DATA/
 
 # Examples folder
 Examples/
+
+# Add ssh agent in midway2
+Programs/add_ssh_agent.sh
