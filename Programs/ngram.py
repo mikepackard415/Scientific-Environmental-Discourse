@@ -59,7 +59,7 @@ def normalizeTokens(word_list, extra_stop=[], model=nlp, lemma=True, MAX_LEN=150
 # Apply tokenization and normalization functions
 env['tokenized_text'] = env['text'].apply(lambda x: word_tokenize(x))
 env['normalized_tokens'] = env['tokenized_text'].apply(lambda x: normalizeTokens(x, lemma=False))
-env.to_pickle('../Data/env.pkl')
+env.to_pickle('../Data/Environmental Discourse/env.pkl')
 
 env['bigrams'] = env['normalized_tokens'].apply(lambda x: [i for i in ngrams(x, 2)])
 bigrams = pd.Series(env['bigrams'].sum()).value_counts().head(100)
