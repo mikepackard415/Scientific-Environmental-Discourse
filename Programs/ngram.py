@@ -1,4 +1,12 @@
 import pandas as pd
+import nltk
+from nltk.util import ngrams
+
+import spacy
+try:
+    nlp = spacy.load("en")
+except OSError:
+    nlp = spacy.load("en_core_web_sm")
 
 env = pd.read_csv('../Data/Environmental Discourse/env.csv', index_col=0)
 
