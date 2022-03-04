@@ -130,9 +130,12 @@ dmypy.json
 
 # Data folder
 DATA/
+Data/
 
 # Examples folder
 Examples/
 
-# Add ssh agent in midway2
+# midway2
 add_ssh_agent.sh
+sbatch/
+
