@@ -124,7 +124,7 @@ def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=2):
     coherence_values = []
     model_list = []
     for num_topics in range(start, limit, step):
-        model = models..ldamulticore.LdaMulticore(corpus=corpus,
+        model = models.ldamulticore.LdaMulticore(corpus=corpus,
                                                  id2word=dictionary,
                                                  num_topics=num_topics,
                                                  workers=effective_n_jobs(-1))
@@ -139,12 +139,16 @@ def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=2):
     
 print('Reading in data, splitting...')
 env = pd.read_csv('../Data/Environmental-Discourse/env.csv', index_col=0)
-env = env.sample(3000, random_state=4151995)
+#env = env.sample(3000, random_state=4151995)
 env, validation = train_test_split(env, test_size=0.5, random_state=3291995)
 
+env['date'] = pd.to_datetime(env.date)
+env['year'] = env.date.dt.year
+
+
 print('Saving split pickles...')
-pd.to_pickle('../Data/Environmental-Discourse/env_0.pkl')
-pd.to_pickle('../Data/Environmental-Discourse/env_validation.pkl')
+env.to_pickle('../Data/Environmental-Discourse/env_0.pkl')
+validation.to_pickle('../Data/Environmental-Discourse/env_validation.pkl')
 
 print('Creating n-gram lists...')
 quadgrams = [('intergovernmental', 'panel', 'climate', 'change'),
@@ -152,11 +156,11 @@ quadgrams = [('intergovernmental', 'panel', 'climate', 'change'),
              ('coal', 'fired', 'power', 'plants'),
              ('national', 'oceanic', 'atmospheric', 'administration')]
 
-tr = pd.read_csv('../Data/Environmental Discourse/trigrams.csv', converters={'Unnamed: 0': ast.literal_eval})
+tr = pd.read_csv('../Data/Environmental-Discourse/trigrams.csv', converters={'Unnamed: 0': ast.literal_eval})
 tr.columns = ['trigram', 'freq', 'tag']
 trigrams = [t for t in tr[tr.tag == 1].trigram]
 
-b = pd.read_csv('../Data/Environmental Discourse/bigrams.csv', converters={'Unnamed: 0': ast.literal_eval})
+b = pd.read_csv('../Data/Environmental-Discourse/bigrams.csv', converters={'Unnamed: 0': ast.literal_eval})
 b.columns = ['bigram', 'freq', 'tag']
 bigrams = [t for t in b[b.tag == 1].bigram]
 
