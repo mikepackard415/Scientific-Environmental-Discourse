@@ -9,11 +9,14 @@ from dask.multiprocessing import get
 import spacy
 from gensim import corpora, models
 from gensim.utils import effective_n_jobs
+from dask.distributed import Client
+from dask import delayed
+import multiprocessing as mp
+import dask
 try:
     nlp = spacy.load("en")
 except OSError:
     nlp = spacy.load("en_core_web_sm")
-
     
 # CREATE FUNCTIONS
 def word_tokenize(word_list, model=nlp, MAX_LEN=1500000):
@@ -114,41 +117,42 @@ def ngram_tagger(tokens):
     
     return tokens_qtb
 
-def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=2):
-    '''
-    Computes Coherence values for LDA models with differing numbers of topics.
-    
-    Returns list of models along with their respective coherence values (pick
-    models with the highest coherence)
-    '''
-    coherence_values = []
-    model_list = []
-    for num_topics in range(start, limit, step):
-        model = models.ldamulticore.LdaMulticore(corpus=corpus,
-                                                 id2word=dictionary,
-                                                 num_topics=num_topics,
-                                                 workers=effective_n_jobs(-1))
-        model_list.append(model)
-        coherence_model = models.coherencemodel.CoherenceModel(model=model, 
-                                                               corpus=corpus,
-                                                               dictionary=dictionary,
-                                                               coherence='u_mass')
-        coherence_values.append(coherence_model.get_coherence())
 
-    return model_list, coherence_values
+def tm(dictionary, corpus, n_topics):
+    model = models.ldamodel.LdaModel(corpus=corpus,
+                                     id2word=dictionary,
+                                     num_topics=n_topics)
+    coherence_model = models.coherencemodel.CoherenceModel(model=model, 
+                                                           corpus=corpus,
+                                                           dictionary=dictionary,
+                                                           coherence='u_mass')
     
+    coherence = coherence_model.get_coherence()
+    
+    topicsDict = {}
+    for topicNum in range(n_topics):
+        topicWords = [w for w, p in model.show_topic(topicNum)]
+        topicsDict['Topic_{}'.format(topicNum)] = topicWords
+
+    wordRanksDF = pd.DataFrame(topicsDict)
+    
+    return model, coherence, wordRanksDF
+
+
+path = 'Environmental Discourse'
+
 print('Reading in data, splitting...')
-env = pd.read_csv('../Data/Environmental-Discourse/env.csv', index_col=0)
+env = pd.read_csv('../Data/' + path + '/env.csv', index_col=0)
 #env = env.sample(3000, random_state=4151995)
-env, validation = train_test_split(env, test_size=0.5, random_state=3291995)
+#env, validation = train_test_split(env, test_size=0.5, random_state=3291995)
 
 env['date'] = pd.to_datetime(env.date)
 env['year'] = env.date.dt.year
-
+env = env.groupby('year').sample(100, random_state=3291995)
 
 print('Saving split pickles...')
-env.to_pickle('../Data/Environmental-Discourse/env_0.pkl')
-validation.to_pickle('../Data/Environmental-Discourse/env_validation.pkl')
+#env.to_pickle('../Data/' + path + '/env_0.pkl')
+#validation.to_pickle('../Data/' + path + '/env_validation.pkl')
 
 print('Creating n-gram lists...')
 quadgrams = [('intergovernmental', 'panel', 'climate', 'change'),
@@ -156,11 +160,11 @@ quadgrams = [('intergovernmental', 'panel', 'climate', 'change'),
              ('coal', 'fired', 'power', 'plants'),
              ('national', 'oceanic', 'atmospheric', 'administration')]
 
-tr = pd.read_csv('../Data/Environmental-Discourse/trigrams.csv', converters={'Unnamed: 0': ast.literal_eval})
+tr = pd.read_csv('../Data/' + path + '/trigrams.csv', converters={'Unnamed: 0': ast.literal_eval})
 tr.columns = ['trigram', 'freq', 'tag']
 trigrams = [t for t in tr[tr.tag == 1].trigram]
 
-b = pd.read_csv('../Data/Environmental-Discourse/bigrams.csv', converters={'Unnamed: 0': ast.literal_eval})
+b = pd.read_csv('../Data/' + path + '/bigrams.csv', converters={'Unnamed: 0': ast.literal_eval})
 b.columns = ['bigram', 'freq', 'tag']
 bigrams = [t for t in b[b.tag == 1].bigram]
 
@@ -187,42 +191,34 @@ bow_corpus_13 = [doc for i, doc in enumerate(bow_corpus) if mask_13.iloc[i]]
 bow_corpus_19 = [doc for i, doc in enumerate(bow_corpus) if mask_19.iloc[i]]
 
 print('Running models...')
-models_07, coherence_07 = compute_coherence_values(dictionary=dictionary, 
-                                                   corpus=tfidf[bow_corpus_07], 
-                                                   texts=env_tok.tokens,
-                                                   start=4, limit=11, step=2)
 
-models_13, coherence_13 = compute_coherence_values(dictionary=dictionary, 
-                                                   corpus=tfidf[bow_corpus_13], 
-                                                   texts=env_tok.tokens,
-                                                   start=4, limit=11, step=2)
+client = Client(threads_per_worker=1, n_workers=mp.cpu_count())
+tm_results = []
 
-models_19, coherence_19 = compute_coherence_values(dictionary=dictionary, 
-                                                   corpus=tfidf[bow_corpus_19], 
-                                                   texts=env_tok.tokens,
-                                                   start=4, limit=11, step=2)
+for corpus in [bow_corpus_07, bow_corpus_13, bow_corpus_19]:
+    for ntopics in range(4, 11, 2):
+        rv = delayed(tm)(dictionary, tfidf[corpus], ntopics)
+        tm_results.append(rv)
+        
+tm_results = dask.compute(*tm_results)
+client.close()
 
 
 print('Saving models, top words, and coherence scores...')
 all_models = models_07 + models_13 + models_19
 names = ['tm_{}_{}'.format(yr, tp) for yr in ['07', '13', '19'] for tp in ['04', '06', '08', '10']]
 
-for model, filename in zip(all_models, names):
-    topicsDict = {}
-    for topicNum in range(model.num_topics):
-        topicWords = [w for w, p in model.show_topic(topicNum)]
-        topicsDict['Topic_{}'.format(topicNum)] = topicWords
+all_coh = []
+for (model, coherence, top_words), filename in zip(tm_results, names):
+    top_words.to_csv('../Data/' + path + '/Single-Year-TMs/Top-Words/' + filename + '.pkl')
+    model.save('../Data/' + path + '/Single-Year-TMs/Models/' + filename)
+    all_coh.append(coherence)
 
-    wordRanksDF = pd.DataFrame(topicsDict)
-    wordRanksDF.to_csv('../Data/Environmental-Discourse/Single-Year-TMs/Top-Words/' + filename + '.pkl')
-    model.save('../Data/Environmental-Discourse/Single-Year-TMs/Models/' + filename)
-
-coherence = coherence_07 + coherence_13 + coherence_19
-coh = pd.DataFrame({'model': names, 'coherence': coherence})
-coh.to_pickle('../Data/Environmental-Discourse/Single-Year-TMS/coherence_scores.pkl')
+coh = pd.DataFrame({'model': names, 'coherence': all_coh})
+coh.to_pickle('../Data/' + path + '/Single-Year-TMS/coherence_scores.pkl')
 
 print('Saving dictionary, bow corpus, tfidf...')
-dictionary.save('../Data/Environmental-Discourse/Single-Year-TMs/dictionary')
-gensim.corpora.MmCorpus.serialize('../Data/Environmental-Discourse/Single-Year-TMs/bow_corpus.mm', bow_corpus)
-tfidf.save('../Data/Environmental-Discourse/Single-Year-TMs/tfidf')
+dictionary.save('../Data/' + path + '/Single-Year-TMs/dictionary')
+gensim.corpora.MmCorpus.serialize('../Data/' + path + '/Single-Year-TMs/bow_corpus.mm', bow_corpus)
+tfidf.save('../Data/' + path + '/Single-Year-TMs/tfidf')
     

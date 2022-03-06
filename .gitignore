@@ -139,3 +139,5 @@ Examples/
 add_ssh_agent.sh
 sbatch/
 
+# Dask
+Programs/dask-worker-space/
