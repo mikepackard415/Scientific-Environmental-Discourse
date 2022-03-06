@@ -116,7 +116,8 @@ def ngram_tagger(tokens):
     
 print('Reading in data, splitting...')
 env = pd.read_csv('../Data/Environmental-Discourse/env.csv', index_col=0)
-env, validation = train_test_split(env, test_size=0.5)
+env = env.sample(3000, random_state=4151995)
+env, validation = train_test_split(env, test_size=0.5, random_state=3291995)
 
 print('Saving split pickles...')
 pd.to_pickle('../Data/Environmental-Discourse/env_0.pkl')
