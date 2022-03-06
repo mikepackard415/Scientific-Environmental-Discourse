@@ -113,6 +113,29 @@ def ngram_tagger(tokens):
             i += 1
     
     return tokens_qtb
+
+def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=2):
+    '''
+    Computes Coherence values for LDA models with differing numbers of topics.
+    
+    Returns list of models along with their respective coherence values (pick
+    models with the highest coherence)
+    '''
+    coherence_values = []
+    model_list = []
+    for num_topics in range(start, limit, step):
+        model = models..ldamulticore.LdaMulticore(corpus=corpus,
+                                                 id2word=dictionary,
+                                                 num_topics=num_topics,
+                                                 workers=effective_n_jobs(-1))
+        model_list.append(model)
+        coherence_model = models.coherencemodel.CoherenceModel(model=model, 
+                                                               corpus=corpus,
+                                                               dictionary=dictionary,
+                                                               coherence='u_mass')
+        coherence_values.append(coherence_model.get_coherence())
+
+    return model_list, coherence_values
     
 print('Reading in data, splitting...')
 env = pd.read_csv('../Data/Environmental-Discourse/env.csv', index_col=0)
