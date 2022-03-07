@@ -2,6 +2,7 @@
 import pandas as pd
 import nltk
 from nltk.util import ngrams
+import sklearn
 from sklearn.model_selection import train_test_split
 import ast
 import dask.dataframe as dd
@@ -118,6 +119,8 @@ def ngram_tagger(tokens):
     
     return tokens_qtb
 
+def dropMissing(wordLst, vocab):
+    return [w for w in wordLst if w in vocab]
 
 def tm(dictionary, corpus, n_topics):
     model = models.ldamodel.LdaModel(corpus=corpus,
@@ -140,20 +143,20 @@ def tm(dictionary, corpus, n_topics):
     return model, coherence, wordRanksDF
 
 
-path = 'Environmental-Discourse'
+path = 'Environmental Discourse'
 
 print('Reading in data, splitting...')
 env = pd.read_csv('../Data/' + path + '/env.csv', index_col=0)
-#env = env.sample(3000, random_state=4151995)
-env, validation = train_test_split(env, test_size=0.5, random_state=3291995)
+env = env.sample(3000, random_state=4151995)
+#env, validation = train_test_split(env, test_size=0.5, random_state=3291995)
 
 env['date'] = pd.to_datetime(env.date)
 env['year'] = env.date.dt.year
 #env = env.groupby('year').sample(100, random_state=3291995)
 
 print('Saving split pickles...')
-env.to_pickle('../Data/' + path + '/env_0.pkl')
-validation.to_pickle('../Data/' + path + '/env_validation.pkl')
+#env.to_pickle('../Data/' + path + '/env_0.pkl')
+#validation.to_pickle('../Data/' + path + '/env_validation.pkl')
 
 print('Creating n-gram lists...')
 quadgrams = [('intergovernmental', 'panel', 'climate', 'change'),
@@ -175,13 +178,27 @@ bigrams = ['_'.join(t) for t in bigrams]
 
 print('Tokeninzing...')
 d_env = dd.from_pandas(env, npartitions=effective_n_jobs(-1))
-d_env['tokens'] = d_env.text.map(lambda x: ngram_tagger(normalizeTokens(word_tokenize(x))), meta=('x', str))
+d_env['tokens_full'] = d_env.text.map(lambda x: ngram_tagger(normalizeTokens(word_tokenize(x))), meta=('x', str))
+d_env['text_reconstructed'] = d_env.tokens_full.map(lambda x: ' '.join(x))
 env_tok = d_env.compute()
 
+print('Reducing data by TF vocabulary...')
+TFIDFVectorizer = sklearn.feature_extraction.text.TfidfVectorizer(max_df=0.5, 
+                                                                  max_features=10000, 
+                                                                  min_df=3, 
+                                                                  norm='l2')
+TFIDFVects = TFIDFVectorizer.fit_transform(env_tok.text_reconstructed)
+
+d_env = dd.from_pandas(env_tok, npartitions=effective_n_jobs(-1))
+d_env['tokens_reduced'] = d_env.tokens_full.map(lambda x: dropMissing(x, TFIDFVectorizer.vocabulary_.keys()))
+env_tok = d_env.compute()
+
+
 print('Creating dictionary, bow corpus, tfidf...')
-dictionary = corpora.Dictionary([i for i in env_tok.tokens])
-bow_corpus = [dictionary.doc2bow(text) for text in env_tok.tokens]
+dictionary = corpora.Dictionary([i for i in env_tok.tokens_reduced])
+bow_corpus = [dictionary.doc2bow(text) for text in env_tok.tokens_reduced]
 #tfidf = models.TfidfModel(bow_corpus)
+
 
 mask_07 = env_tok.year == 2007
 mask_13 = env_tok.year == 2013
