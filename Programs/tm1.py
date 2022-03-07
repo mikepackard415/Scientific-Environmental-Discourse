@@ -152,8 +152,8 @@ env['year'] = env.date.dt.year
 #env = env.groupby('year').sample(100, random_state=3291995)
 
 print('Saving split pickles...')
-#env.to_pickle('../Data/' + path + '/env_0.pkl')
-#validation.to_pickle('../Data/' + path + '/env_validation.pkl')
+env.to_pickle('../Data/' + path + '/env_0.pkl')
+validation.to_pickle('../Data/' + path + '/env_validation.pkl')
 
 print('Creating n-gram lists...')
 quadgrams = [('intergovernmental', 'panel', 'climate', 'change'),
@@ -181,7 +181,7 @@ env_tok = d_env.compute()
 print('Creating dictionary, bow corpus, tfidf...')
 dictionary = corpora.Dictionary([i for i in env_tok.tokens])
 bow_corpus = [dictionary.doc2bow(text) for text in env_tok.tokens]
-tfidf = models.TfidfModel(bow_corpus)
+#tfidf = models.TfidfModel(bow_corpus)
 
 mask_07 = env_tok.year == 2007
 mask_13 = env_tok.year == 2013
@@ -197,7 +197,7 @@ tm_results = []
 
 for corpus in [bow_corpus_07, bow_corpus_13, bow_corpus_19]:
     for ntopics in range(4, 11, 2):
-        rv = delayed(tm)(dictionary, tfidf[corpus], ntopics)
+        rv = delayed(tm)(dictionary, corpus, ntopics)
         tm_results.append(rv)
         
 tm_results = dask.compute(*tm_results)
@@ -218,6 +218,6 @@ coh.to_pickle('../Data/' + path + '/Single-Year-TMs/coherence_scores.pkl')
 print('Saving dictionary, bow corpus, tfidf...')
 dictionary.save('../Data/' + path + '/Single-Year-TMs/dictionary')
 gensim.corpora.MmCorpus.serialize('../Data/' + path + '/Single-Year-TMs/bow_corpus.mm', bow_corpus)
-tfidf.save('../Data/' + path + '/Single-Year-TMs/tfidf')
+#tfidf.save('../Data/' + path + '/Single-Year-TMs/tfidf')
     
 print('Complete! Praise the lord!')
