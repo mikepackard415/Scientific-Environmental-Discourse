@@ -7,6 +7,7 @@ import ast
 import dask.dataframe as dd
 from dask.multiprocessing import get
 import spacy
+import gensim
 from gensim import corpora, models
 from gensim.utils import effective_n_jobs
 from dask.distributed import Client
@@ -139,16 +140,16 @@ def tm(dictionary, corpus, n_topics):
     return model, coherence, wordRanksDF
 
 
-path = 'Environmental Discourse'
+path = 'Environmental-Discourse'
 
 print('Reading in data, splitting...')
 env = pd.read_csv('../Data/' + path + '/env.csv', index_col=0)
 #env = env.sample(3000, random_state=4151995)
-#env, validation = train_test_split(env, test_size=0.5, random_state=3291995)
+env, validation = train_test_split(env, test_size=0.5, random_state=3291995)
 
 env['date'] = pd.to_datetime(env.date)
 env['year'] = env.date.dt.year
-env = env.groupby('year').sample(100, random_state=3291995)
+#env = env.groupby('year').sample(100, random_state=3291995)
 
 print('Saving split pickles...')
 #env.to_pickle('../Data/' + path + '/env_0.pkl')
@@ -192,7 +193,6 @@ bow_corpus_19 = [doc for i, doc in enumerate(bow_corpus) if mask_19.iloc[i]]
 
 print('Running models...')
 
-client = Client(threads_per_worker=1, n_workers=mp.cpu_count())
 tm_results = []
 
 for corpus in [bow_corpus_07, bow_corpus_13, bow_corpus_19]:
@@ -201,11 +201,9 @@ for corpus in [bow_corpus_07, bow_corpus_13, bow_corpus_19]:
         tm_results.append(rv)
         
 tm_results = dask.compute(*tm_results)
-client.close()
 
 
 print('Saving models, top words, and coherence scores...')
-all_models = models_07 + models_13 + models_19
 names = ['tm_{}_{}'.format(yr, tp) for yr in ['07', '13', '19'] for tp in ['04', '06', '08', '10']]
 
 all_coh = []
@@ -215,10 +213,11 @@ for (model, coherence, top_words), filename in zip(tm_results, names):
     all_coh.append(coherence)
 
 coh = pd.DataFrame({'model': names, 'coherence': all_coh})
-coh.to_pickle('../Data/' + path + '/Single-Year-TMS/coherence_scores.pkl')
+coh.to_pickle('../Data/' + path + '/Single-Year-TMs/coherence_scores.pkl')
 
 print('Saving dictionary, bow corpus, tfidf...')
 dictionary.save('../Data/' + path + '/Single-Year-TMs/dictionary')
 gensim.corpora.MmCorpus.serialize('../Data/' + path + '/Single-Year-TMs/bow_corpus.mm', bow_corpus)
 tfidf.save('../Data/' + path + '/Single-Year-TMs/tfidf')
     
+print('Complete! Praise the lord!')
