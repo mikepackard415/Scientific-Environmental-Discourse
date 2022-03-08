@@ -146,7 +146,7 @@ def tm(dictionary, corpus, n_topics):
 path = 'Environmental-Discourse'
 
 print('Reading in data...')
-env = pd.read_pkl('../Data/' + path + '/env_0.pkl')
+env = pd.read_pickle('../Data/' + path + '/env_0.pkl')
 
 print('Creating n-gram lists...')
 quadgrams = [('intergovernmental', 'panel', 'climate', 'change'),
@@ -200,7 +200,7 @@ tm_results = dask.compute(*tm_results)
 
 
 print('Saving models, top words, and coherence scores...')
-names = ['tm_{}'.format(tp) tp in ['04', '05', '06', '07', '08', '09', '10']]
+names = ['tm_{}'.format(tp) for  tp in ['04', '05', '06', '07', '08', '09', '10']]
 
 all_coh = []
 for (model, coherence, top_words), filename in zip(tm_results, names):

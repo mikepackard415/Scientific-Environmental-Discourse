@@ -143,7 +143,7 @@ def tm(dictionary, corpus, n_topics):
     return model, coherence, wordRanksDF
 
 
-path = 'Environmental Discourse'
+path = 'Environmental-Discourse'
 
 #print('Reading in data, splitting...')
 #env = pd.read_csv('../Data/' + path + '/env.csv', index_col=0)
