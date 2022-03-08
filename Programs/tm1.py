@@ -125,7 +125,8 @@ def dropMissing(wordLst, vocab):
 def tm(dictionary, corpus, n_topics):
     model = models.ldamodel.LdaModel(corpus=corpus,
                                      id2word=dictionary,
-                                     num_topics=n_topics)
+                                     num_topics=n_topics,
+                                     alpha='auto', eta='auto')
     coherence_model = models.coherencemodel.CoherenceModel(model=model, 
                                                            corpus=corpus,
                                                            dictionary=dictionary,
