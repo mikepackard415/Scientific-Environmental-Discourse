@@ -145,18 +145,21 @@ def tm(dictionary, corpus, n_topics):
 
 path = 'Environmental Discourse'
 
-print('Reading in data, splitting...')
-env = pd.read_csv('../Data/' + path + '/env.csv', index_col=0)
-env = env.sample(3000, random_state=4151995)
+#print('Reading in data, splitting...')
+#env = pd.read_csv('../Data/' + path + '/env.csv', index_col=0)
+#env = env.sample(3000, random_state=4151995)
 #env, validation = train_test_split(env, test_size=0.5, random_state=3291995)
 
-env['date'] = pd.to_datetime(env.date)
-env['year'] = env.date.dt.year
+#env['date'] = pd.to_datetime(env.date)
+#env['year'] = env.date.dt.year
 #env = env.groupby('year').sample(100, random_state=3291995)
 
-print('Saving split pickles...')
+#print('Saving split pickles...')
 #env.to_pickle('../Data/' + path + '/env_0.pkl')
 #validation.to_pickle('../Data/' + path + '/env_validation.pkl')
+
+print('Reading in data...')
+env = pd.read_pickle('../Data/' + path + '/env_0.pkl')
 
 print('Creating n-gram lists...')
 quadgrams = [('intergovernmental', 'panel', 'climate', 'change'),
