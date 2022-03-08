@@ -190,16 +190,16 @@ dictionary = corpora.Dictionary([i for i in env_tok.tokens_reduced])
 bow_corpus = [dictionary.doc2bow(text) for text in env_tok.tokens_reduced]
 
 print('Running model...')
-model, coherence, top_words = tm(dictionary, bow_corpus, ntopics)
+model, coherence, top_words = tm(dictionary, bow_corpus, 100)
 
 print('Saving models, top words, and coherence scores...')
 model.save('../Data/' + path + '/Full-TMs/Models/lda_100')
 
 print('Append topic-document loadings to dataframe...')
-env_tok['lda_topics'] = [model[dictionary.doc2bow(l)] for l in env['tokens_reduced']]
+env_tok['lda_topics'] = [model[dictionary.doc2bow(l)] for l in env_tok['tokens_reduced']]
 
 #Dict to temporally hold the probabilities
-topicsProbDict = {i : [0] * len(env) for i in range(model.num_topics)}
+topicsProbDict = {i : [0] * len(env_tok) for i in range(model.num_topics)}
 
 #Load them into the dict
 for index, topicTuples in enumerate(env_tok['lda_topics']):
@@ -212,8 +212,8 @@ for topicNum in range(model.num_topics):
     env_tok['topic_{}'.format(topicNum)] = topicsProbDict[topicNum]
     col_names.append('topic_{}'.format(topicNum))
 
-env_doc_topic = env[['source','url','title','date','text','year'] + col_names]
+env_doc_topic = env_tok[['source','url','title','date','text','year'] + col_names]
 env_doc_topic.to_csv('../Data/'+path+'/Full-TMs/lda100_loadings.csv')
-env_doc_topic.to_pkl('../Data/'+path+'/Full-TMs/lda100_loadings.pkl')
+env_doc_topic.to_pickle('../Data/'+path+'/Full-TMs/lda100_loadings.pkl')
 
 print("COMPLETE!")
