@@ -143,20 +143,10 @@ def tm(dictionary, corpus, n_topics):
     return model, coherence, wordRanksDF
 
 
-path = 'Environmental Discourse'
+path = 'Environmental-Discourse'
 
-print('Reading in data, splitting...')
-env = pd.read_csv('../Data/' + path + '/env.csv', index_col=0)
-env = env.sample(3000, random_state=4151995)
-#env, validation = train_test_split(env, test_size=0.5, random_state=3291995)
-
-env['date'] = pd.to_datetime(env.date)
-env['year'] = env.date.dt.year
-#env = env.groupby('year').sample(100, random_state=3291995)
-
-print('Saving split pickles...')
-#env.to_pickle('../Data/' + path + '/env_0.pkl')
-#validation.to_pickle('../Data/' + path + '/env_validation.pkl')
+print('Reading in data...')
+env = pd.read_pkl('../Data/' + path + '/env_0.pkl')
 
 print('Creating n-gram lists...')
 quadgrams = [('intergovernmental', 'panel', 'climate', 'change'),
@@ -197,42 +187,31 @@ env_tok = d_env.compute()
 print('Creating dictionary, bow corpus, tfidf...')
 dictionary = corpora.Dictionary([i for i in env_tok.tokens_reduced])
 bow_corpus = [dictionary.doc2bow(text) for text in env_tok.tokens_reduced]
-#tfidf = models.TfidfModel(bow_corpus)
 
-
-mask_07 = env_tok.year == 2007
-mask_13 = env_tok.year == 2013
-mask_19 = env_tok.year == 2019
-
-bow_corpus_07 = [doc for i, doc in enumerate(bow_corpus) if mask_07.iloc[i]]
-bow_corpus_13 = [doc for i, doc in enumerate(bow_corpus) if mask_13.iloc[i]]
-bow_corpus_19 = [doc for i, doc in enumerate(bow_corpus) if mask_19.iloc[i]]
-
-print('Running models...')
+print('Running model...')
 
 tm_results = []
 
-for corpus in [bow_corpus_07, bow_corpus_13, bow_corpus_19]:
-    for ntopics in range(4, 11, 2):
-        rv = delayed(tm)(dictionary, corpus, ntopics)
-        tm_results.append(rv)
+for ntopics in range(4, 11, 1):
+    rv = delayed(tm)(dictionary, bow_corpus, ntopics)
+    tm_results.append(rv)
         
 tm_results = dask.compute(*tm_results)
 
 
 print('Saving models, top words, and coherence scores...')
-names = ['tm_{}_{}'.format(yr, tp) for yr in ['07', '13', '19'] for tp in ['04', '06', '08', '10']]
+names = ['tm_{}'.format(tp) tp in ['04', '05', '06', '07', '08', '09', '10']]
 
 all_coh = []
 for (model, coherence, top_words), filename in zip(tm_results, names):
-    model.save('../Data/' + path + '/Single-Year-TMs/Models/' + filename)
+    model.save('../Data/' + path + '/Full-TMs/Models/' + filename)
     all_coh.append(coherence)
 
 coh = pd.DataFrame({'model': names, 'coherence': all_coh})
-coh.to_pickle('../Data/' + path + '/Single-Year-TMs/coherence_scores.pkl')
+coh.to_pickle('../Data/' + path + '/Full-TMs/coherence_scores.pkl')
 
 print('Saving dictionary, bow corpus, tfidf...')
-dictionary.save('../Data/' + path + '/Single-Year-TMs/dictionary')
-gensim.corpora.MmCorpus.serialize('../Data/' + path + '/Single-Year-TMs/bow_corpus.mm', bow_corpus)
-    
+dictionary.save('../Data/' + path + '/Full-TMs/dictionary')
+gensim.corpora.MmCorpus.serialize('../Data/' + path + '/Full-TMs/bow_corpus.mm', bow_corpus)
+
 print('Complete! Praise the lord!')
