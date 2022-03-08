@@ -147,7 +147,7 @@ def tm(dictionary, corpus, n_topics):
 path = 'Environmental-Discourse'
 
 print('Reading in data...')
-env = pd.read_pkl('../Data/' + path + '/env_0.pkl')
+env = pd.read_pickle('../Data/' + path + '/env_0.pkl')
 
 print('Creating n-gram lists...')
 quadgrams = [('intergovernmental', 'panel', 'climate', 'change'),
