@@ -164,5 +164,5 @@ d_env['tokens_reduced'] = d_env.tokens_full.map(lambda x: dropMissing(x, TFIDFVe
 d_env['text_processed'] = d_env.tokens_full.map(lambda x: ' '.join(x))
 env_tok = d_env.compute()
 
-env_processed = env[['url', 'title', 'date', 'text_processed']]
+env_processed = env_tok[['url', 'title', 'date', 'text_processed']]
 env_processed.to_csv('../Data/'+path+'/env_processed.csv')
