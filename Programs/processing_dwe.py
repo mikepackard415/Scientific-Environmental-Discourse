@@ -1,4 +1,5 @@
 import pandas as pd
+import ast
 import dask.dataframe as dd
 from gensim.utils import effective_n_jobs
 import spacy
