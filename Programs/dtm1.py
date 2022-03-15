@@ -4,7 +4,7 @@ from gensim import corpora, models
 import ast
 
 # Set path
-path = 'Environmental Discourse'
+path = 'Environmental-Discourse'
 
 # Read in data
 env = pd.read_csv('../Data/'+path+'/env_processed_tokens.csv', 
