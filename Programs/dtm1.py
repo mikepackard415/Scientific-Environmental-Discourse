@@ -13,8 +13,8 @@ env = pd.read_csv('../Data/'+path+'/env_processed_tokens.csv',
 env['date'] = pd.to_datetime(env.date)
 env['year'] = env.date.dt.year
 
-dictionary = corpora.Dictionary.load('../Data/Environmental Discourse/Full-TMs/dictionary')
-corpus = corpora.MmCorpus('../Data/Environmental Discourse/Single-Year-TMs/bow_corpus.mm')
+dictionary = corpora.Dictionary.load('../Data/'+path+'/Full-TMs/dictionary')
+corpus = corpora.MmCorpus('../Data/'+path+'/Single-Year-TMs/bow_corpus.mm')
 
 # Set up model
 docs_per_time_slice = list(env.groupby('year').agg({'year':'count'}).year)
