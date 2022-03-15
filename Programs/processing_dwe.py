@@ -69,8 +69,8 @@ def sent_tokenize(word_list, model=nlp):
     return sentences
 
 d_env = dd.from_pandas(env, npartitions=effective_n_jobs(-1))
-env['tokenized_sents'] = env.text.apply(lambda x: [word_tokenize(s) for s in sent_tokenize(x)])
-env['normalized_sents'] = env['tokenized_sents'].apply(lambda x: [normalizeTokens(s, lemma=False) for s in x])
+d_env['tokenized_sents'] = d_env.text.map(lambda x: [word_tokenize(s) for s in sent_tokenize(x)])
+d_env['normalized_sents'] = d_env.tokenized_sents.map(lambda x: [normalizeTokens(s, lemma=False) for s in x])
 env = d_env.compute()
 
 env.to_pickle('../Data/'+path+'/env_processed_sent.pkl')
