@@ -9,7 +9,7 @@ except OSError:
     nlp = spacy.load("en_core_web_sm")
 
 path = 'Environmental-Discourse'
-env = pd.read_pickle('../Data/'+path+'/env_0.pkl')
+env = pd.read_pickle('../../Data/'+path+'/env_0.pkl')
 env = env[env.year == 2005]
 
 def word_tokenize(word_list, model=nlp, MAX_LEN=1500000):
@@ -118,11 +118,11 @@ quadgrams = [('intergovernmental', 'panel', 'climate', 'change'),
              ('coal', 'fired', 'power', 'plants'),
              ('national', 'oceanic', 'atmospheric', 'administration')]
 
-tr = pd.read_csv('../Data/' + path + '/trigrams.csv', converters={'Unnamed: 0': ast.literal_eval})
+tr = pd.read_csv('../../Data/' + path + '/trigrams.csv', converters={'Unnamed: 0': ast.literal_eval})
 tr.columns = ['trigram', 'freq', 'tag']
 trigrams = [t for t in tr[tr.tag == 1].trigram]
 
-b = pd.read_csv('../Data/' + path + '/bigrams.csv', converters={'Unnamed: 0': ast.literal_eval})
+b = pd.read_csv('../../Data/' + path + '/bigrams.csv', converters={'Unnamed: 0': ast.literal_eval})
 b.columns = ['bigram', 'freq', 'tag']
 bigrams = [t for t in b[b.tag == 1].bigram]
 
@@ -138,5 +138,5 @@ d_env['sents'] = d_env.text.map(lambda x: [ngram_tagger(
 d_env['sents'] = d_env.sents.map(lambda x: [s for s in x if len(s)>0])
 env = d_env.compute()
 
-env.to_pickle('../Data/'+path+'/sent_processing/env_processed_sent_05.pkl')
-env.to_csv('../Data/'+path+'/sent_processing/env_processed_sent_05.csv')
+env.to_pickle('../../Data/'+path+'/sent_processing/env_processed_sent_05.pkl')
+env.to_csv('../../Data/'+path+'/sent_processing/env_processed_sent_05.csv')
